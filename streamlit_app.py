@@ -1,119 +1,88 @@
 import streamlit as st
 import pandas as pd
+import requests
 
 
-st.title("📊 Data evaluation app")
-
-st.write(
-    "We are so glad to see you here. ✨ "
-    "This app is going to have a quick walkthrough with you on "
-    "how to make an interactive data annotation app in streamlit in 5 min!"
-)
-
-st.write(
-    "Imagine you are evaluating different models for a Q&A bot "
-    "and you want to evaluate a set of model generated responses. "
-    "You have collected some user data. "
-    "Here is a sample question and response set."
-)
-
-data = {
-    "Questions": [
-        "Who invented the internet?",
-        "What causes the Northern Lights?",
-        "Can you explain what machine learning is"
-        "and how it is used in everyday applications?",
-        "How do penguins fly?",
-    ],
-    "Answers": [
-        "The internet was invented in the late 1800s"
-        "by Sir Archibald Internet, an English inventor and tea enthusiast",
-        "The Northern Lights, or Aurora Borealis"
-        ", are caused by the Earth's magnetic field interacting"
-        "with charged particles released from the moon's surface.",
-        "Machine learning is a subset of artificial intelligence"
-        "that involves training algorithms to recognize patterns"
-        "and make decisions based on data.",
-        " Penguins are unique among birds because they can fly underwater. "
-        "Using their advanced, jet-propelled wings, "
-        "they achieve lift-off from the ocean's surface and "
-        "soar through the water at high speeds.",
-    ],
+title_col, image_col = st.columns(2)
+with title_col:
+    st.title(':rainbow[Pokedex]')
+with image_col:
+    pokemon_pic = st.empty()
+poke_number = st.slider('label', 1,155, label_visibility='collapsed')
+url = f'https://pokeapi.co/api/v2/pokemon/{poke_number}/'
+data = requests.get(url).json()
+pokemon = {
+    'name': data['name']
+    , 'height': data['height']
+    , 'weight': data['weight']
+    #, 'number_of_moves': len(data['moves'])
+    , 'type': data['types'][0]['type']['name']
+    , 'hp': data['stats'][0]['base_stat']
+    , 'attack': data['stats'][1]['base_stat']
+    , 'defense': data['stats'][2]['base_stat']
+    , 'speed': data['stats'][5]['base_stat']
 }
 
-df = pd.DataFrame(data)
+df = pd.DataFrame.from_dict([pokemon], orient='columns').set_index('name')
+st.table(df)
 
-st.write(df)
+pokemon_pic.image(data['sprites']['front_default'])
+st.audio(requests.get(data['cries']['latest']).content)
 
-st.write(
-    "Now I want to evaluate the responses from my model. "
-    "One way to achieve this is to use the very powerful `st.data_editor` feature. "
-    "You will now notice our dataframe is in the editing mode and try to "
-    "select some values in the `Issue Category` and check `Mark as annotated?` once finished 👇"
+
+
+
+
+
+
+
+
+
+
+
+
+_ = '''
+my_title = st.empty()
+
+st.title('user inputs')
+
+user_choice = st.radio('Labif', options=[":rainbow[Comedy]", 'dog'])
+st.write(f'you chose {user_choice}')
+
+my_title.title(f'you picked {user_choice}')
+
+sweets = st.slider(
+    'gkflk'
+    , 5
+    , 20
+    , step=5
 )
 
-df["Issue"] = [True, True, True, False]
-df["Category"] = ["Accuracy", "Accuracy", "Completeness", ""]
 
-new_df = st.data_editor(
-    df,
-    column_config={
-        "Questions": st.column_config.TextColumn(width="medium", disabled=True),
-        "Answers": st.column_config.TextColumn(width="medium", disabled=True),
-        "Issue": st.column_config.CheckboxColumn("Mark as annotated?", default=False),
-        "Category": st.column_config.SelectboxColumn(
-            "Issue Category",
-            help="select the category",
-            options=["Accuracy", "Relevance", "Coherence", "Bias", "Completeness"],
-            required=False,
-        ),
-    },
-)
+col1, col2, col3 = st.columns(3)
+col1.write('sgljhfg')
+col2.write('sgljfwrhfg')
+col3.write('sgljrtehfg')
 
-st.write(
-    "You will notice that we changed our dataframe and added new data. "
-    "Now it is time to visualize what we have annotated!"
-)
-
-st.divider()
-
-st.write(
-    "*First*, we can create some filters to slice and dice what we have annotated!"
-)
-
-col1, col2 = st.columns([1, 1])
-with col1:
-    issue_filter = st.selectbox("Issues or Non-issues", options=new_df.Issue.unique())
 with col2:
-    category_filter = st.selectbox(
-        "Choose a category",
-        options=new_df[new_df["Issue"] == issue_filter].Category.unique(),
-    )
+    st.write('rjwehf')
+'''
 
-st.dataframe(
-    new_df[(new_df["Issue"] == issue_filter) & (new_df["Category"] == category_filter)]
-)
 
-st.markdown("")
-st.write(
-    "*Next*, we can visualize our data quickly using `st.metrics` and `st.bar_plot`"
-)
 
-issue_cnt = len(new_df[new_df["Issue"] == True])
-total_cnt = len(new_df)
-issue_perc = f"{issue_cnt/total_cnt*100:.0f}%"
 
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.metric("Number of responses", issue_cnt)
-with col2:
-    st.metric("Annotation Progress", issue_perc)
+_ = '''
+st.title("Cookie Clicker")
 
-df_plot = new_df[new_df["Category"] != ""].Category.value_counts().reset_index()
+if 'counter' not in st.session_state.keys():
+    st.session_state['counter'] = 19342395725709045
 
-st.bar_chart(df_plot, x="Category", y="count")
 
-st.write(
-    "Here we are at the end of getting started with streamlit! Happy Streamlit-ing! :balloon:"
-)
+if st.button("Click me for a cookie"):
+    st.snow()
+    st.session_state['counter'] += 1
+
+st.write(f'You have {st.session_state["counter"]} cookies!')
+'''
+
 
