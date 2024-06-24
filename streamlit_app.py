@@ -4,27 +4,9 @@ import pandas as pd
 import random
 
 
-
-
 def get_jason(num):
     _url = f'https://pokeapi.co/api/v2/pokemon/{num}/'
     return requests.get(_url).json()
-
-min_poke_num = 1
-max_poke_num = 155
-df = pd.DataFrame()
-title_col, image_col = st.columns([4,1])
-with title_col:
-    st.title(':rainbow[Pokedex]')
-with image_col:
-    pokemon_pic = st.empty()
-poke_number = st.slider(
-    'label'
-    , min_poke_num
-    , max_poke_num
-    , label_visibility='collapsed'
-)
-used_pokemon = {poke_number}
 
 def extend_df(_num):
     _d = get_jason(_num)
@@ -39,34 +21,7 @@ def extend_df(_num):
         , 'Speed': _d['stats'][5]['base_stat']
     }
     return pd.DataFrame.from_dict([_p], orient='columns').set_index('Name')
-data = get_jason(poke_number)
-df = pd.concat([df, extend_df(poke_number)])
-while len(used_pokemon) < 5:
-    random_number = random.randint(min_poke_num, max_poke_num)
-    if random_number not in used_pokemon:
-        used_pokemon.add(random_number)
-        df = pd.concat([df, extend_df(random_number)])
 
-
-df_show = df.copy()
-sort_col = st.radio('Sort by', options=list(df_show.columns))
-df_show.sort_values(sort_col, ascending=True, inplace=True)
-
-pokemon_pic.image(data['sprites']['front_default'])
-st.write('We sorted the column!')
-st.table(df_show.head(5))
-audio_mode = st.radio('Version', options=['Legacy', 'Latest'])
-st.audio(requests.get(data['cries'][audio_mode.lower()]).content)
-
-
-height_col, weight_col = st.columns(2)
-with height_col:
-    st.bar_chart(df.reset_index(), x='Name',y='Height',x_label='',color=(2,255,255,0.5))
-with weight_col:
-    st.bar_chart(df.reset_index(), x='Name',y='Weight',x_label='')
-
-
-df_fight = df.copy().reset_index().iloc[0:2,:]
 def calc_win(_fightdf):
     h1 = df_fight.iloc[0]["Health"]
     a1 = df_fight.iloc[0]["Attack"]
@@ -78,7 +33,54 @@ def calc_win(_fightdf):
         return df_fight.iloc[0]["Name"], df_fight.iloc[1]["Name"]
     else:
         return df_fight.iloc[1]["Name"], df_fight.iloc[0]["Name"]
-st.write(f'I think that {calc_win(df_fight)[0]} will win vs {calc_win(df_fight)[1]} based on the health, attack, and defense stats.')
+
+
+min_poke_num = 1
+max_poke_num = 155
+df = pd.DataFrame()
+
+title_col, image_col = st.columns([4,1])
+with title_col:
+    st.title(':rainbow[Pokedex]')
+with image_col:
+    pokemon_pic = st.empty()
+poke_number = st.slider(
+    'label'
+    , min_poke_num
+    , max_poke_num
+    , label_visibility='collapsed'
+)
+
+used_pokemon = {poke_number}
+data = get_jason(poke_number)
+df = pd.concat([df, extend_df(poke_number)])
+while len(used_pokemon) < 5:
+    random_number = random.randint(min_poke_num, max_poke_num)
+    if random_number not in used_pokemon:
+        used_pokemon.add(random_number)
+        df = pd.concat([df, extend_df(random_number)])
+
+
+page = st.selectbox('Mode', options=['Charts', 'Prediction'])
+
+if page == 'Charts':
+    df_show = df.copy()
+    sort_col = st.selectbox('Sort by', options=list(df_show.columns))
+    df_show.sort_values(sort_col, ascending=True, inplace=True)
+
+    pokemon_pic.image(data['sprites']['front_default'])
+    st.table(df_show.head(5))
+    audio_mode = st.radio('Version', options=['Legacy', 'Latest'])
+    st.audio(requests.get(data['cries'][audio_mode.lower()]).content)
+
+    height_col, weight_col = st.columns(2)
+    with height_col:
+        st.bar_chart(df.reset_index(), x='Name',y='Height',x_label='',color=(2,255,255,0.5))
+    with weight_col:
+        st.bar_chart(df.reset_index(), x='Name',y='Weight',x_label='')
+else:
+    df_fight = df.copy().reset_index().iloc[0:2,:]
+    st.write(f'I think that {calc_win(df_fight)[0]} will win vs {calc_win(df_fight)[1]} based on the health, attack, and defense stats.')
 
 
 
