@@ -53,6 +53,7 @@ sort_col = st.radio('Sort by', options=list(df_show.columns))
 df_show.sort_values(sort_col, ascending=True, inplace=True)
 
 pokemon_pic.image(data['sprites']['front_default'])
+st.write('We sorted the column!')
 st.table(df_show.head(5))
 st.audio(requests.get(data['cries']['legacy']).content)
 
