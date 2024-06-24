@@ -41,7 +41,7 @@ df = pd.DataFrame()
 
 title_col, image_col = st.columns([4,1])
 with title_col:
-    st.title(':rainbow[Pokedex]')
+    st.title('Pokedex')
 with image_col:
     pokemon_pic = st.empty()
 poke_number = st.slider(
@@ -61,7 +61,8 @@ while len(used_pokemon) < 5:
         df = pd.concat([df, extend_df(random_number)])
 
 
-page = st.selectbox('Mode', options=['Charts', 'Prediction'])
+page = st.selectbox('Mode', options=['Prediction', 'Charts'])
+
 
 if page == 'Charts':
     df_show = df.copy()
@@ -80,7 +81,7 @@ if page == 'Charts':
         st.bar_chart(df.reset_index(), x='Name',y='Weight',x_label='')
 else:
     df_fight = df.copy().reset_index().iloc[0:2,:]
-    st.write(f'I think that {calc_win(df_fight)[0]} will win vs {calc_win(df_fight)[1]} based on the health, attack, and defense stats.')
+    st.write(f'I think that :rainbow[{calc_win(df_fight)[0]}] will win vs {calc_win(df_fight)[1]} based on the health, attack, and defense stats.')
 
 
 
