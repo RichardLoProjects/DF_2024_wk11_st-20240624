@@ -55,7 +55,8 @@ df_show.sort_values(sort_col, ascending=True, inplace=True)
 pokemon_pic.image(data['sprites']['front_default'])
 st.write('We sorted the column!')
 st.table(df_show.head(5))
-st.audio(requests.get(data['cries']['legacy']).content)
+audio_mode = st.radio('Version', options=['Legacy', 'Latest'])
+st.audio(requests.get(data['cries'][audio_mode.lower()]).content)
 
 
 height_col, weight_col = st.columns(2)
