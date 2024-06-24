@@ -41,14 +41,19 @@ def extend_df(_num):
     return pd.DataFrame.from_dict([_p], orient='columns').set_index('Name')
 data = get_jason(poke_number)
 df = pd.concat([df, extend_df(poke_number)])
-while len(used_pokemon) < 3:
+while len(used_pokemon) < 5:
     random_number = random.randint(min_poke_num, max_poke_num)
     if random_number not in used_pokemon:
         used_pokemon.add(random_number)
         df = pd.concat([df, extend_df(random_number)])
 
+
+df_show = df.copy()
+sort_col = st.radio('Sort by', options=list(df_show.columns))
+df_show.sort_values(sort_col, ascending=True, inplace=True)
+
 pokemon_pic.image(data['sprites']['front_default'])
-st.table(df.head(5))
+st.table(df_show.head(5))
 st.audio(requests.get(data['cries']['legacy']).content)
 
 
@@ -57,6 +62,22 @@ with height_col:
     st.bar_chart(df.reset_index(), x='Name',y='Height',x_label='',color=(2,255,255,0.5))
 with weight_col:
     st.bar_chart(df.reset_index(), x='Name',y='Weight',x_label='')
+
+
+df_fight = df.copy().reset_index().iloc[0:2,:]
+def calc_win(_fightdf):
+    h1 = df_fight.iloc[0]["Health"]
+    a1 = df_fight.iloc[0]["Attack"]
+    d1 = df_fight.iloc[0]["Defense"]
+    h2 = df_fight.iloc[1]["Health"]
+    a2 = df_fight.iloc[1]["Attack"]
+    d2 = df_fight.iloc[1]["Defense"]
+    if h1 * (a2-d1) > h2 * (a1-d2):
+        return df_fight.iloc[0]["Name"], df_fight.iloc[1]["Name"]
+    else:
+        return df_fight.iloc[1]["Name"], df_fight.iloc[0]["Name"]
+st.write(f'I think that {calc_win(df_fight)[0]} will win vs {calc_win(df_fight)[1]} based on the health, attack, and defense stats.')
+
 
 
 
